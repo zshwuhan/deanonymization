@@ -108,7 +108,7 @@ void Norm(){
 		}
 	}
 	printf("MAX SCORE IN THIS ROUND %0.5f\n", max);
-	for (int i = 1; i <=n[0]; i++){
+	for (int i = 1; i <= n[0]; i++){
 		for (int j = 1; j <= n[1]; j++){
 			score[i][j] /= max;
 		}

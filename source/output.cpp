@@ -6,7 +6,9 @@ std::vector< mapping > temp;
 // Get the complete max match between the two graphs. 
 // Note that if the flag is set to 1, the following code will use a boost trick.
 void matrix_mapping(int iter, int flag){
-	priority_queue<mapping> HEAP;
+	//priority_queue<mapping> HEAP;
+	std::vector< mapping > HEAP;
+
 	int reset_tag = 0;
 	int use[2][N];
 	FILE *fp = NULL;
@@ -19,7 +21,9 @@ void matrix_mapping(int iter, int flag){
 	printf("[STAGE 2] PUSHING THE HEAP\n");
 	for (int i = 1; i <= n[0]; i++)
 		for (int j = 1; j <= n[1]; j++)
-			HEAP.push(mapping(i, j, score[i][j]));			
+			HEAP.push_back(mapping(i, j, score[i][j]));			
+	
+	sort(HEAP.begin(), HEAP.begin()+HEAP.size(), cmp);
 
 	printf("[STAGE 2] HEAP PUSHING DONE\n");
 	
@@ -32,14 +36,12 @@ void matrix_mapping(int iter, int flag){
 
 	// Output the mapping base on the similarity score in reverse order.
 	printf("[STAGE 2] MAPPING ACROSS GRAPHS\n");
-	while(!HEAP.empty()){
- 		mapping t0 = HEAP.top();
+	for (int i = 0; i < HEAP.size(); i++){
+ 		mapping t0 = HEAP[i];
  		 		
  		// If one node of this pair has been used then pass.
-		if (use[0][t0.f1] == 1 || use[1][t0.f2] == 1 ){
-			HEAP.pop();
+		if (use[0][t0.f1] == 1 || use[1][t0.f2] == 1 )
 			continue;
-		}
 
  		// Mark this pair as used.
 		use[0][t0.f1] = 1;
@@ -57,15 +59,6 @@ void matrix_mapping(int iter, int flag){
 			if (tempScore[t0.f1][corNode[t0.f2]]) ndiff++;
 		}
 
-    // If the degree of the node is too small...skip
-
-	 	if (ALGO != 0)
-	 		if ((degree_G1[t0.f1] <= 3) || (degree_G2[t0.f2] <= 3)){
-	 			temp.push_back(mapping(t0.f1, t0.f2, 0));
-	 			if (corNode[t0.f2] == t0.f1 && t0.f1 <= OVERLAP) 
-	 				reset_tag++;
-	 		} 		
-
 		// Increase the total output mapping number.
 		numCounter++;
 	
@@ -73,10 +66,23 @@ void matrix_mapping(int iter, int flag){
 		fprintf(fp, "G1: %05d GA: %04d G2: %04d D: %04d P: %08.4f Total: %08.4f%%\n", 
 			t0.f1, t0.f2, corNode[t0.f2], 
 			degree_G1[t0.f1], t0.v, mapNum*100/numCounter); 
-	
-		// Pop this pair.
-		HEAP.pop();
+
+    // If the degree of the node is too small...skip
+
+	 	if (ALGO != 0)
+	 		if (numCounter >= (0.05 * n[0]))
+	 			break;
+	 		/*
+	 		if ((degree_G1[t0.f1] <= 10) || (degree_G2[t0.f2] <= 10)){
+	 			temp.push_back(mapping(t0.f1, t0.f2, 0));
+	 			if (corNode[t0.f2] == t0.f1 && t0.f1 <= OVERLAP) 
+	 				reset_tag++;
+	 		}
+	 		*/
+	 		 		
+
 	}
+	/*
 	if (ALGO != 0){
 		correctCounter -= reset_tag;
 		mapNum -= reset_tag;
@@ -87,8 +93,9 @@ void matrix_mapping(int iter, int flag){
 			node_match[temp[i].f1] = 0;
 			rev_node_match[temp[i].f2] = 0;
 		}
-
 	}
+	*/
+	
 	fprintf(fp,"Correct Mapping Number In This Round Is %04d\n",correctCounter);
 	printf("[STAGE 2] COREECT MAPPING NUMBER: %04d\n",correctCounter);
 	fclose(fp);
@@ -105,12 +112,16 @@ float MAX(float x, float y){
 }
 
 void mapping_induction(){
-	priority_queue<mapping> HEAP;
+	std::vector< mapping > HEAP;
+
 	int REFINE_ITER = 0;
+	int REFINE_TIME = 0;
+	int CONST = 10;
 	FILE *fp = fopen("./result/induction.txt","w");
 	float MINNUM = 1e20;
-	float MINW = 1e20;
+
 	printf("Entering mapping_induction\n");
+
 	weight.resize(n[0]+1);
 	for (int i = 1; i <= n[0]; i++)
 		weight[i].resize(n[1]+1);
@@ -119,18 +130,18 @@ void mapping_induction(){
 		for (int j = 1; j <= n[1]; j++)
 			if ((MINNUM > score[i][j]) && (score[i][j] > 0))
 				MINNUM = score[i][j];
-	printf("MINNUM %f\n", MINNUM);
+
 refine:	
-	MINW = 1e20;
 	
-	while (!HEAP.empty()) HEAP.pop();
+	HEAP.clear();
+
 	for (int i = 1; i <= n[0]; i++)
 		for (int j = 1; j <= n[1]; j++)
 			weight[i][j] = 0;
+		
 	for (int i = 1; i <= n[0]; i++){
 		if (node_match[i]) continue;
 		int node = i;
-
 
 		// node->neb && n0->node_match[neb]
 		for (int j = 0; j < edges_G1[node].size(); j++){
@@ -162,30 +173,32 @@ refine:
 			}
 		}
 
+
 	}
 
 	for (int i = 1; i <= n[0]; i++)
-		for (int j = 1; j<= n[1]; j++){
+		for (int j = 1; j <= n[1]; j++){
 			if (node_match[i] > 0 || rev_node_match[j] > 0) continue;
 			if (weight[i][j] == 0) continue; 
-			if (weight[i][j] < MINW)
-				MINW = weight[i][j];
-			HEAP.push(mapping(i, j, weight[i][j]));
+			HEAP.push_back(mapping(i, j, weight[i][j]));
 		}
+	
+	sort(HEAP.begin(), HEAP.begin()+HEAP.size(), cmp);
+
 	printf("HEAP size: %lu\n", HEAP.size());
-	printf("MINW: %f\n", MINW);
-	while (!HEAP.empty()){
-		mapping topMapping = HEAP.top();
+
+	for (int i = 0; i < HEAP.size(); i++){
+		mapping topMapping = HEAP[i];
 		
-		if (node_match[topMapping.f1] > 0 || rev_node_match[topMapping.f2] > 0) {
-			HEAP.pop();
+		if (node_match[topMapping.f1] > 0 || rev_node_match[topMapping.f2] > 0) 
 			continue;
-		}
 
 		if (ALGO == 2)
-			if ((REFINE_ITER < 3) && (topMapping.v < (2.9*MINNUM))) {
-				REFINE_ITER++;
-				printf("REFINE_ITER: %d\n", REFINE_ITER);
+			REFINE_ITER++;
+			if ((REFINE_ITER >= CONST)) {
+				REFINE_ITER = 0;
+				REFINE_TIME ++;
+				printf("REFINE_ITER: %d\n", REFINE_TIME);
 				goto refine;
 			}
 
@@ -194,7 +207,7 @@ refine:
 
 		// Check whether we get the correct mapping
  		if (corNode[topMapping.f2] == topMapping.f1 && topMapping.f1<=OVERLAP){
- 			mapNum += 1;
+ 			mapNum++;
  			correctCounter++;
  		} else{
  			total_diff++;
@@ -209,7 +222,6 @@ refine:
 			degree_G1[topMapping.f1], 
 			topMapping.f2, topMapping.v, mapNum*100/numCounter); 
 
-		HEAP.pop();
 	}
 	fclose(fp);
 
