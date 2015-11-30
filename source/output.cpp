@@ -17,6 +17,11 @@ void matrix_mapping(int iter, int flag){
 	correctCounter = 0;
   numCounter = 0;
 
+  for (int i = 1; i <= n[0]; i++){
+  	node_match[i] = 0;
+  	rev_node_match[i] = 0;
+  }
+
 	// Push the similarity matrix to the heap	
 	printf("[STAGE 2] PUSHING THE HEAP\n");
 	for (int i = 1; i <= n[0]; i++)
@@ -26,11 +31,6 @@ void matrix_mapping(int iter, int flag){
 	sort(HEAP.begin(), HEAP.begin()+HEAP.size(), cmp);
 
 	printf("[STAGE 2] HEAP PUSHING DONE\n");
-	
-	for (int i = 1; i <= n[0]; i++){
-		use[0][i] = 0;
-		use[1][i] = 0;
-	}
 
 	fp = fopen("./result/mappingIter.txt", "w");
 
@@ -40,23 +40,20 @@ void matrix_mapping(int iter, int flag){
  		mapping t0 = HEAP[i];
  		 		
  		// If one node of this pair has been used then pass.
-		if (use[0][t0.f1] == 1 || use[1][t0.f2] == 1 )
+		if ((node_match[t0.f1] > 0) || (rev_node_match[t0.f2] > 0))
 			continue;
 
  		// Mark this pair as used.
-		use[0][t0.f1] = 1;
-		use[1][t0.f2] = 1;
-
 		node_match[t0.f1] = t0.f2;
 		rev_node_match[t0.f2] = t0.f1;
 
 		// In our case we consider it a correct mapping
-		if (corNode[t0.f2] == t0.f1 && t0.f1 <= OVERLAP){
+		if ((corNode[t0.f1] == t0.f2) && (t0.f1 <= OVERLAP)){
 			mapNum += 1;
 			correctCounter++;
 		} else {
 			total_diff++;
-			if (tempScore[t0.f1][corNode[t0.f2]]) ndiff++;
+			if (tempScore[corNode[t0.f1]][t0.f2]) ndiff++;
 		}
 
 		// Increase the total output mapping number.
@@ -64,7 +61,7 @@ void matrix_mapping(int iter, int flag){
 	
 		// Output the mapping info for debugging.
 		fprintf(fp, "G1: %05d GA: %04d G2: %04d D: %04d P: %08.4f Total: %08.4f%%\n", 
-			t0.f1, t0.f2, corNode[t0.f2], 
+			t0.f1, t0.f2, corNode[t0.f1], 
 			degree_G1[t0.f1], t0.v, mapNum*100/numCounter); 
 
     // If the degree of the node is too small...skip
@@ -146,14 +143,12 @@ refine:
 		// node->neb && n0->node_match[neb]
 		for (int j = 0; j < edges_G1[node].size(); j++){
 			int neb = edges_G1[node][j];
-			if (node_match[neb] > 0){
-				for (int k = 0; k < rev_edges_G2[node_match[neb]].size(); k++){
-					int n0 = rev_edges_G2[node_match[neb]][k];
-					if (rev_node_match[n0] > 0) continue;
-					if (ALGO == 2)
-						weight[node][n0] += MAX(score[neb][node_match[neb]], MINNUM);
-					else
-						weight[node][n0] += score[neb][node_match[neb]];
+			int cor = node_match[neb];
+			if (cor > 0){
+				for (int k = 0; k < rev_edges_G2[cor].size(); k++){
+					int n0 = rev_edges_G2[cor][k];
+					if (rev_node_match[n0] == 0) 
+						weight[node][n0] += MAX(score[node][n0], MINNUM);
 				}
 			}
 		}
@@ -161,85 +156,89 @@ refine:
 		// neb->node && node_match[neb]->n0
 		for (int j = 0; j < rev_edges_G1[node].size(); j++){
 			int neb = rev_edges_G1[node][j];
-			if (node_match[neb] > 0){
-				for (int k = 0; k < edges_G2[node_match[neb]].size(); k++){
-					int n0 = edges_G2[node_match[neb]][k];
-					if (rev_node_match[n0] > 0) continue;
-					if (ALGO == 2)
-						weight[node][n0] += MAX(score[neb][node_match[neb]], MINNUM);
-					else
-						weight[node][n0] += score[neb][node_match[neb]];
+			int cor = node_match[neb];
+			if (cor > 0){
+				for (int k = 0; k < edges_G2[cor].size(); k++){
+					int n0 = edges_G2[cor][k];
+					if (rev_node_match[n0] == 0)
+						weight[node][n0] += MAX(score[node][n0], MINNUM);
 				}
 			}
 		}
 
 
-	}
+		for (int j = 1; j <= n[1]; j++){
+			if (rev_node_match[j] > 0) continue;
+			if (weight[i][j] == 0) continue;
+			HEAP.push_back(mapping(i, j, weight[i][j]));
+		}
 
+
+	}
+	/*
 	for (int i = 1; i <= n[0]; i++)
 		for (int j = 1; j <= n[1]; j++){
 			if (node_match[i] > 0 || rev_node_match[j] > 0) continue;
 			if (weight[i][j] == 0) continue; 
 			HEAP.push_back(mapping(i, j, weight[i][j]));
 		}
-	
+	*/
 	sort(HEAP.begin(), HEAP.begin()+HEAP.size(), cmp);
 
 	printf("HEAP size: %lu\n", HEAP.size());
 
 	for (int i = 0; i < HEAP.size(); i++){
 		mapping topMapping = HEAP[i];
-		
-		if (node_match[topMapping.f1] > 0 || rev_node_match[topMapping.f2] > 0) 
-			continue;
 
-		if (ALGO == 2)
-			REFINE_ITER++;
-			if ((REFINE_ITER >= CONST)) {
-				REFINE_ITER = 0;
-				REFINE_TIME ++;
-				printf("REFINE_ITER: %d\n", REFINE_TIME);
-				goto refine;
-			}
+		REFINE_ITER++;
+		if (REFINE_ITER > CONST) {
+			REFINE_ITER = 0;
+			REFINE_TIME ++;
+			printf("REFINE_ITER: %d\n", REFINE_TIME);
+			goto refine;
+		}
+		
+		if ((node_match[topMapping.f1] > 0) || (rev_node_match[topMapping.f2] > 0)) 
+			continue;
 
 		node_match[topMapping.f1] = topMapping.f2;
 		rev_node_match[topMapping.f2] = topMapping.f1;
 
 		// Check whether we get the correct mapping
- 		if (corNode[topMapping.f2] == topMapping.f1 && topMapping.f1<=OVERLAP){
+ 		if ((corNode[topMapping.f1] == topMapping.f2) && (topMapping.f1 <= OVERLAP)){
  			mapNum++;
  			correctCounter++;
  		} else{
  			total_diff++;
- 			if (tempScore[topMapping.f1][corNode[topMapping.f2]]) ndiff++; 			
+ 			if (tempScore[corNode[topMapping.f1]][topMapping.f2]) ndiff++; 			
  		}
 
  		// Increase the total output mapping number.
  		numCounter++;
-
-		fprintf(fp, "G1: %04d G2: %04d D: %04d M: %04d P: %04.2f Total: %08.4f%%\n", 
-			topMapping.f1, corNode[topMapping.f2], 
-			degree_G1[topMapping.f1], 
-			topMapping.f2, topMapping.v, mapNum*100/numCounter); 
+		printf("correctCounter: %04d numCounter:%04d\n", correctCounter, numCounter);
+		fprintf(fp, "G1: %04d G2: %04d D: %04d P: %06.4f Total: %08.4f%%\n", 
+			corNode[topMapping.f1], topMapping.f2, 
+			degree_G2[topMapping.f2], 
+			topMapping.v, mapNum*100/numCounter); 
 
 	}
 	fclose(fp);
-
+	printf("correctCounter: %04d numCounter:%04d\n", correctCounter, numCounter);
 	printf("Among all wrong mappings %04d/%04d=%06.2f%% are actually the same.\n", 
 		ndiff, total_diff, (float)ndiff*100.0/(float)total_diff);
 
 }
 
 int node_cmp(int x, int y){
-	if (edges_G1[x].size() != edges_G1[y].size()) 
+	if (edges_G2[x].size() != edges_G2[y].size()) 
 		return 0;
-	if (rev_edges_G1[x].size() != rev_edges_G1[y].size())
+	if (rev_edges_G2[x].size() != rev_edges_G2[y].size())
 		return 0;
-	for (int i = 0; i < edges_G1[x].size(); i++)
-		if (edges_G1[x][i] != edges_G1[y][i])
+	for (int i = 0; i < edges_G2[x].size(); i++)
+		if (edges_G2[x][i] != edges_G2[y][i])
 			return 0;
-	for (int i = 0; i < rev_edges_G1[x].size(); i++)
-		if (rev_edges_G1[x][i] != rev_edges_G1[y][i])
+	for (int i = 0; i < rev_edges_G2[x].size(); i++)
+		if (rev_edges_G2[x][i] != rev_edges_G2[y][i])
 			return 0;
 	return 1;
 }

@@ -6,7 +6,7 @@ void main_init(){
 	int nb_count = 0;
 	int r;
 
-	fp = fopen("./data/graph1.txt","r");
+	fp = fopen("./data/graphTarget.txt","r");
 	r = fscanf(fp, "%d %d", &n[0], &m[0]);
 
 	edges_G1.resize(n[0]+1);
@@ -29,7 +29,7 @@ void main_init(){
 		if (degree_G1[i] > nb_count) 
 			nb_count = degree_G1[i];
 
-	fp = fopen("./data/graphTarget.txt","r");
+	fp = fopen("./data/graph1.txt","r");
 	r = fscanf(fp, "%d %d", &n[1], &m[1]);
 
 	edges_G2.resize(n[1]+1);
