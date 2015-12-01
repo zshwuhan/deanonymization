@@ -4,9 +4,9 @@ pthread_t threads[MAX_THREAD];
 
 
 // Get a maxmatch of the neighbors of x and y.
-float maxMatch(int x, int y, int id){
+double maxMatch(int x, int y, int id){
 	int use[2][MAX_DGE];
-	float sum = 0.0;
+	double sum = 0.0;
 	int n1, n2, num, outCnt;
 	// Match the forward-edge neighbors
 	memset(use, 0, sizeof(use));
@@ -74,7 +74,7 @@ void* threadTask(void* args){
 		}
 		count ++;
 		if ((count % 10) == 0) 
-			printf("ROUND %02d, THREAD %02d AT %05d, PROGRESS: %06.02f %%\n", iterNum, threadNum, i, ((float)i*100)/n[0]);		
+			printf("ROUND %02d, THREAD %02d AT %05d, PROGRESS: %06.02f %%\n", iterNum, threadNum, i, ((double)i*100)/n[0]);		
 	}
 	return NULL;
 }
@@ -101,7 +101,7 @@ void Cal(){
 
 // Normalize the matrix so that it can converge.
 void Norm(){
-	float max = 0;
+	double max = 0;
 	for (int i = 1; i <= n[0]; i++){
 		for (int j = 1; j <= n[1]; j++){
 			if (max < score[i][j]) max = score[i][j];

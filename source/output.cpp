@@ -1,6 +1,6 @@
 #include "baseAlgo.h"
 int ndiff = 0, total_diff = 0;
-std::vector< std::vector<float> > weight;
+std::vector< std::vector<double> > weight;
 std::vector< mapping > temp;
 
 // Get the complete max match between the two graphs. 
@@ -98,10 +98,10 @@ void matrix_mapping(int iter, int flag){
 	fclose(fp);
 
 	printf("Among all wrong mappings %04d/%04d=%05.2f%% are actually the same.\n", 
-		ndiff, total_diff, (float)ndiff*100.0/(float)total_diff);
+		ndiff, total_diff, (double)ndiff*100.0/(double)total_diff);
 		
 }
-float MAX(float x, float y){
+double MAX(double x, double y){
 	if (x < y) 
 		return y;
 	else
@@ -115,7 +115,7 @@ void mapping_induction(){
 	int REFINE_TIME = 0;
 	int CONST = 10;
 	FILE *fp = fopen("./result/induction.txt","w");
-	float MINNUM = 1e20;
+	double MINNUM = 1e20;
 
 	printf("Entering mapping_induction\n");
 
@@ -225,7 +225,7 @@ refine:
 	fclose(fp);
 	printf("correctCounter: %04d numCounter:%04d\n", correctCounter, numCounter);
 	printf("Among all wrong mappings %04d/%04d=%06.2f%% are actually the same.\n", 
-		ndiff, total_diff, (float)ndiff*100.0/(float)total_diff);
+		ndiff, total_diff, (double)ndiff*100.0/(double)total_diff);
 
 }
 
@@ -262,7 +262,7 @@ void matrix_dump(){
 
 	for (int i = 1; i <= n[0]; i++)
 		for (int j = 1; j <= n[1]; j++)
-			fprintf(fp, "%f ", score[i][j]);
+			fprintf(fp, "%lf ", score[i][j]);
 
 	fclose(fp);
 }
@@ -274,7 +274,7 @@ void matrix_retrieve(){
 
 	for (int i = 1; i <= n[0]; i++)
 		for (int j = 1; j <= n[1]; j++)
-			r = fscanf(fp, "%f ", &score[i][j]);
+			r = fscanf(fp, "%lf ", &score[i][j]);
 
 	fclose(fp);
 	printf("%d %d\n", n[0], n[1]);

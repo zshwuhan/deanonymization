@@ -21,7 +21,7 @@ using namespace std;
 
 struct mapping{
   int f1, f2;
-  float v;
+  double v;
   
   friend bool operator < (mapping n1, mapping n2){
     return n1.v < n2.v;
@@ -30,7 +30,7 @@ struct mapping{
   mapping(){
   }    
 
-  mapping(int x, int y, float z){
+  mapping(int x, int y, double z){
   	f1 = x;
   	f2 = y;
   	v = z;
@@ -49,11 +49,11 @@ extern FILE *fp;
 extern int OVERLAP, THREAD, ITERFLAG, ALGO;
 extern int iterGlobal;
 extern vector< vector<int> > edges_G1, rev_edges_G1, edges_G2, rev_edges_G2;
-extern vector< vector<float> > score, tempScore;
+extern vector< vector<double> > score, tempScore;
 extern vector<int> degree_G1, degree_G2;
 extern int corNode[N], node_match[N], rev_node_match[N];
 extern int numCounter, correctCounter;
-extern float mapNum;
+extern double mapNum;
 
 extern void matrix_dump();
 extern void matrix_retrieve();
@@ -63,7 +63,7 @@ extern void main_init();
 extern void Norm();
 extern void Cal();
 //extern void* threadTask(void* args);
-//extern float maxMatch(int x, int y, int id);
+//extern double maxMatch(int x, int y, int id);
 extern void matrix_mapping(int iter, int flag);
 extern void node_info();
 extern void mapping_induction();

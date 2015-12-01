@@ -3,15 +3,15 @@
 int n[2],m[2];
 FILE *fp = NULL;
 int OVERLAP, THREAD, ITERFLAG, ALGO;
-//float score[N][N], tempScore[N][N];
-std::vector< std::vector<float> > score, tempScore;
+//double score[N][N], tempScore[N][N];
+std::vector< std::vector<double> > score, tempScore;
 int corNode[N];
 int iterGlobal;
 int node_match[N];
 int rev_node_match[N];
 int correctCounter;
 int numCounter;
-float mapNum;
+double mapNum;
 
 ////////////////////////////////////////////////////////////////
 
