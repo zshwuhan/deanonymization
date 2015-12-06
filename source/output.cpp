@@ -60,45 +60,29 @@ void matrix_mapping(int iter, int flag){
 		numCounter++;
 	
 		// Output the mapping info for debugging.
-		fprintf(fp, "G1: %05d GA: %04d G2: %04d D: %04d P: %08.4f Total: %08.4f%%\n", 
+		fprintf(fp, "G1: %05d GA: %04d G2: %04d D: %04d P: %08.4lf Total: %08.4lf%%\n", 
 			t0.f1, t0.f2, corNode[t0.f1], 
-			degree_G1[t0.f1], t0.v, mapNum*100/numCounter); 
+			degree_G1[t0.f1], t0.v, mapNum * 100 / numCounter); 
 
     // If the degree of the node is too small...skip
 
 	 	if (ALGO != 0)
 	 		if (numCounter >= (0.05 * n[0]))
-	 			break;
-	 		/*
-	 		if ((degree_G1[t0.f1] <= 10) || (degree_G2[t0.f2] <= 10)){
-	 			temp.push_back(mapping(t0.f1, t0.f2, 0));
-	 			if (corNode[t0.f2] == t0.f1 && t0.f1 <= OVERLAP) 
-	 				reset_tag++;
-	 		}
-	 		*/
-	 		 		
-
+	 			break; 		 		
 	}
-	/*
-	if (ALGO != 0){
-		correctCounter -= reset_tag;
-		mapNum -= reset_tag;
-		numCounter -= temp.size();
-		for (int i = 0; i < temp.size(); i++){
-			use[0][temp[i].f1] = 0;
-			use[1][temp[i].f2] = 0;
-			node_match[temp[i].f1] = 0;
-			rev_node_match[temp[i].f2] = 0;
-		}
-	}
-	*/
-	
 	fprintf(fp,"Correct Mapping Number In This Round Is %04d\n",correctCounter);
 	printf("[STAGE 2] COREECT MAPPING NUMBER: %04d\n",correctCounter);
 	fclose(fp);
 
-	printf("Among all wrong mappings %04d/%04d=%05.2f%% are actually the same.\n", 
+	printf("Among all wrong mappings %04d/%04d=%05.2lf%% are actually the same.\n", 
 		ndiff, total_diff, (double)ndiff*100.0/(double)total_diff);
+	
+	if (ALGO == 0){
+		fp = fopen("./result/result.txt","w");
+		fprintf(fp, "Version:0, Mapped:%04d/%04d=%05.2lf%%\n", 
+			correctCounter, numCounter, mapNum * 100 / numCounter);
+		fclose(fp);
+	}
 		
 }
 double MAX(double x, double y){
@@ -175,14 +159,6 @@ refine:
 
 
 	}
-	/*
-	for (int i = 1; i <= n[0]; i++)
-		for (int j = 1; j <= n[1]; j++){
-			if (node_match[i] > 0 || rev_node_match[j] > 0) continue;
-			if (weight[i][j] == 0) continue; 
-			HEAP.push_back(mapping(i, j, weight[i][j]));
-		}
-	*/
 	sort(HEAP.begin(), HEAP.begin()+HEAP.size(), cmp);
 
 	printf("HEAP size: %lu\n", HEAP.size());
@@ -216,7 +192,7 @@ refine:
  		// Increase the total output mapping number.
  		numCounter++;
 		printf("correctCounter: %04d numCounter:%04d\n", correctCounter, numCounter);
-		fprintf(fp, "G1: %04d G2: %04d D: %04d P: %06.4f Total: %08.4f%%\n", 
+		fprintf(fp, "G1: %04d G2: %04d D: %04d P: %06.4lf Total: %08.4lf%%\n", 
 			corNode[topMapping.f1], topMapping.f2, 
 			degree_G2[topMapping.f2], 
 			topMapping.v, mapNum*100/numCounter); 
@@ -224,8 +200,16 @@ refine:
 	}
 	fclose(fp);
 	printf("correctCounter: %04d numCounter:%04d\n", correctCounter, numCounter);
-	printf("Among all wrong mappings %04d/%04d=%06.2f%% are actually the same.\n", 
+	printf("Among all wrong mappings %04d/%04d=%06.2lf%% are actually the same.\n", 
 		ndiff, total_diff, (double)ndiff*100.0/(double)total_diff);
+	
+	if (ALGO != 0){
+		fp = fopen("./result/result.txt","a");
+		fprintf(fp, "Version:1, Mapped:%04d/%04d=%05.2lf%%\n", 
+			correctCounter, numCounter, mapNum * 100 / numCounter);
+		fclose(fp);
+	}
+
 
 }
 

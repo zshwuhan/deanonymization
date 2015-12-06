@@ -60,7 +60,20 @@ double maxMatch(int x, int y, int id){
 		sum += sortList[id][i].v;
 	}
 	sortList[id].clear();
-	return sum;
+	
+	//A naive thought to fix the sim matrix;
+	double L1 = degree_G1[x];
+	double L2 = degree_G2[y];
+	double diff;
+	if (L1 > L2)
+		diff = L1 / L2;
+	else
+		diff = L2 / L1;
+
+	return sum / diff;
+
+
+
 }
 
 

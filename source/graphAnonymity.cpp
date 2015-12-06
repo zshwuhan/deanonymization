@@ -2,26 +2,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <vector>
 using namespace std;
 #define N 100000
 #define M 1000000
-int n, m;
-int TYPE;
-FILE *fp = NULL;
 struct edge{
 	int h;
 	int t;
 	int valid;
 };
 struct edge eg[M];
-int nTag[N];
-int pnum;
-int naive_cnt = 10000;
+vector< vector<int> > edges;
+int nTag[N], pnum, naive_cnt = 10000;
+int n, m, TYPE;
+FILE *fp = NULL;
+
+
+
 void init(){
 	fp = fopen("./data/graph2.txt","r");
 	fscanf(fp, "%d %d", &n, &m);
+	edges.resize(n+1);
+	for (int i = 1; i <= n; i++)
+		edges[i].resize(n+1);
 	for (int i = 1; i <= m; i++){
 		fscanf(fp, "%d %d", &eg[i].h, &eg[i].t);
+		edges[eg[i].h][eg[i].t] = 1;
 		eg[i].valid = 1;
 	}
 	for (int i = 1; i <= n; i++){
@@ -43,19 +49,45 @@ void naive(){
 		nTag[y] = tmp;
 	}
 }
-void perturb(){
-	//printf("%d\n", pnum);
+void sparsify(){
 	srand(time(NULL));
 	int cnt = pnum;
-	while(cnt--){
+	while (cnt--){
 		retry:
 			int x = rand() % m + 1;
 			if (eg[x].valid == 0)
 				goto retry;
-			//printf("%d %d\n", x, cnt);
 			eg[x].valid = 0;
 	}
 
+}
+void switching(){
+	srand(time(NULL));
+	int cnt = pnum / 2;
+	while (cnt--){
+		retry:
+			
+			int p1 = rand() % m + 1;
+			int p2 = rand() % m + 1;
+			if (p1 == p2) 
+				goto retry;
+			
+			int x1 = eg[p1].h;
+			int x2 = eg[p1].t;
+			int y1 = eg[p2].h;
+			int y2 = eg[p2].t;
+			
+			if (edges[x1][y2] || edges[y1][x2])
+				goto retry;
+
+			edges[x1][x2] = 0;
+			edges[y1][y2] = 0;
+			edges[x1][y2] = 1;
+			edges[y1][x2] = 1;
+
+			eg[p1].t = y2;
+			eg[p2].t = x2;
+	}
 }
 void output(){
 	fp = fopen("./data/pair.txt","w");
@@ -74,11 +106,14 @@ void output(){
 int main(int argv, char* argc[]){
 	TYPE = atoi(argc[1]);
 	init();
-	//printf("%d\n", TYPE);
 	switch (TYPE){
 		case 1:
 			pnum = (int)(0.1*m);
-			perturb();
+			sparsify();
+			break;
+		case 2:
+			pnum = (int)(0.1*m);
+			switching();
 			break;
 		default:
 			naive();
