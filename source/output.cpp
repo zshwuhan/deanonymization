@@ -8,7 +8,7 @@ std::vector< mapping > temp;
 void matrix_mapping(int iter, int flag){
 
 
-	if (ALGO == 2)
+	if (PICK_ALGO == 2)
 		for (int i = 1; i <= n[0]; i++)
 			for (int j = 1; j <= n[1]; j++){
 					double L1 = degree_G1[i];
@@ -21,9 +21,6 @@ void matrix_mapping(int iter, int flag){
 					diff = log(diff + 1) / log(2);
 					score[i][j] /= diff;
 			}
-
-
-
 
 	std::vector< mapping > HEAP;
 
@@ -84,7 +81,7 @@ void matrix_mapping(int iter, int flag){
 
     // If the degree of the node is too small...skip
 
-	 	if (ALGO != 0)
+	 	if (PICK_ALGO != 0)
 	 		if (numCounter >= (0.05 * n[0]))
 	 			break; 		 		
 	}
@@ -95,7 +92,7 @@ void matrix_mapping(int iter, int flag){
 	printf("Among all wrong mappings %04d/%04d=%05.2lf%% are actually the same.\n", 
 		ndiff, total_diff, (double)ndiff*100.0/(double)total_diff);
 	
-	if (ALGO == 0){
+	if (PICK_ALGO == 0){
 		fp = fopen("./result/result.txt","w");
 		fprintf(fp, "Version:0, Mapped:%04d/%04d=%05.2lf%%\n", 
 			correctCounter, numCounter, mapNum * 100 / numCounter);
@@ -221,7 +218,7 @@ refine:
 	printf("Among all wrong mappings %04d/%04d=%06.2lf%% are actually the same.\n", 
 		ndiff, total_diff, (double)ndiff*100.0/(double)total_diff);
 	
-	if (ALGO != 0){
+	if (PICK_ALGO != 0){
 		fp = fopen("./result/result.txt","a");
 		fprintf(fp, "Version:1, Mapped:%04d/%04d=%05.2lf%%\n", 
 			correctCounter, numCounter, mapNum * 100 / numCounter);

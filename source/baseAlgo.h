@@ -46,7 +46,8 @@ struct mapping{
 
 extern int n[2],m[2];
 extern FILE *fp;
-extern int OVERLAP, THREAD, ITERFLAG, ALGO;
+extern int OVERLAP, THREAD, ITERFLAG;
+extern int ITER_ALGO, PICK_ALGO;
 extern int iterGlobal;
 extern vector< vector<int> > edges_G1, rev_edges_G1, edges_G2, rev_edges_G2;
 extern vector< vector<double> > score, tempScore;

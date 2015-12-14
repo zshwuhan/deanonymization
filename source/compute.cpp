@@ -1,7 +1,7 @@
 #include "baseAlgo.h"
 vector< mapping > sortList[MAX_THREAD];
 pthread_t threads[MAX_THREAD];
-
+#define BETA 0.15
 
 // Get a maxmatch of the neighbors of x and y.
 double maxMatch(int x, int y, int id){
@@ -66,11 +66,13 @@ double maxMatch(int x, int y, int id){
 	double L2 = degree_G2[y];
 	double diff;
 	if (L1 > L2)
-		diff = L1 / L2;
+		diff = L1;
 	else
-		diff = L2 / L1;
-	diff = log(diff + 1) / log(2);
-	//return sum / diff;
+		diff = L2;
+
+	if (ITER_ALGO == 1)
+		sum = sum/diff * (1 - BETA)+BETA;
+
 	return sum;
 
 }

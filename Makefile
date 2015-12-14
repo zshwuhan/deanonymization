@@ -1,8 +1,9 @@
-OVERLAP=5000
+OVERLAP=10000
 THREAD=8
 ITERFLAG=1
-ALGO=0
-ENCRYPT=1
+ITER_ALGO=0
+PICK_ALGO=0
+ENCRYPT=0
 CODE=./source/
 OBJ=./bin/
 DATA=./data/
@@ -30,11 +31,11 @@ main:
 
 .PHONY: run-full
 run-full:
-	@$(OBJ)baseAlgo $(OVERLAP) $(THREAD) 1 $(ALGO)
+	@$(OBJ)baseAlgo $(OVERLAP) $(THREAD) 1 $(ITER_ALGO) $(PICK_ALGO)
 
 .PHONY: run
 run:
-	@$(OBJ)baseAlgo $(OVERLAP) $(THREAD) 0 $(ALGO)
+	@$(OBJ)baseAlgo $(OVERLAP) $(THREAD) 0 $(ITER_ALGO) $(PICK_ALGO)
 
 
 .PHONY: split
@@ -46,6 +47,17 @@ split:
 encrypt:
 	@$(OBJ)graphAnonymity $(ENCRYPT)
 	@echo "anonimated"
+
+.PHONT: test
+test:
+	@$(OBJ)baseAlgo $(OVERLAP) $(THREAD) 1 0 0
+	@$(OBJ)baseAlgo $(OVERLAP) $(THREAD) 0 0 1
+	@$(OBJ)baseAlgo $(OVERLAP) $(THREAD) 0 0 2
+
+.PHONT: newtest
+newtest:
+	@$(OBJ)baseAlgo $(OVERLAP) $(THREAD) 1 0 0
+	@$(OBJ)baseAlgo $(OVERLAP) $(THREAD) 1 0 1
 
 .PHONY: clean
 clean:
