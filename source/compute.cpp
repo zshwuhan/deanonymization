@@ -69,10 +69,9 @@ double maxMatch(int x, int y, int id){
 		diff = L1 / L2;
 	else
 		diff = L2 / L1;
-
-	return sum / diff;
-
-
+	diff = log(diff + 1) / log(2);
+	//return sum / diff;
+	return sum;
 
 }
 

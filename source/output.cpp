@@ -6,7 +6,25 @@ std::vector< mapping > temp;
 // Get the complete max match between the two graphs. 
 // Note that if the flag is set to 1, the following code will use a boost trick.
 void matrix_mapping(int iter, int flag){
-	//priority_queue<mapping> HEAP;
+
+
+	if (ALGO == 2)
+		for (int i = 1; i <= n[0]; i++)
+			for (int j = 1; j <= n[1]; j++){
+					double L1 = degree_G1[i];
+					double L2 = degree_G2[j];
+					double diff;
+					if (L1 > L2)
+						diff = L1 / L2;
+					else
+						diff = L2 / L1;
+					diff = log(diff + 1) / log(2);
+					score[i][j] /= diff;
+			}
+
+
+
+
 	std::vector< mapping > HEAP;
 
 	int reset_tag = 0;
